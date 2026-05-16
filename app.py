@@ -9,10 +9,18 @@ CPP_EXE = os.path.join(os.path.dirname(__file__), "query_engine.exe")
 
 @app.route('/')
 def index():
+    """Renders the main search interface."""
     return render_template('index.html')
 
 @app.route('/search')
 def search():
+    """
+    Handles autocomplete requests.
+    
+    1. Receives a query string 'q' from the frontend.
+    2. Executes the C++ query engine via subprocess.
+    3. Parses the output and returns a JSON response.
+    """
     query = request.args.get('q', '')
     if len(query) < 2:
         return jsonify([])

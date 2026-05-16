@@ -22,67 +22,85 @@ using namespace std;
  */
 
 // A Trie Node
+/**
+ * Represents a single node in the Trie.
+ */
 class TrieNode {
-    public:
-        TrieNode* children[26]; // An array to store the pointers 
-        bool isEndOfWord;   // A delimiter to signal the end of a particular word
+public:
+    TrieNode* children[26]; // Pointers to child nodes for each letter 'a'-'z'
+    bool isEndOfWord;       // True if this node marks the completion of a valid word
 
-        TrieNode() {
-            isEndOfWord = false;
-            for (int i = 0; i < 26; i++) {
-                children[i] = nullptr; // Modern c++ standard
-            }
+    TrieNode() {
+        isEndOfWord = false;
+        for (int i = 0; i < 26; i++) {
+            children[i] = nullptr;
         }
+    }
 };
 
+/**
+ * Trie class providing core functionality for inserting words and 
+ * retrieving autocomplete suggestions based on prefixes.
+ */
 class Trie {
+private:
+    TrieNode* root;
 
-    private:
-        TrieNode* root;
-
-        void storeAllWordsWithGivenPrefix(TrieNode* node, string currentPrefix, vector<string>& result) { // Doing a dfs search for collecting all words that start with a given prefix
-            if (node->isEndOfWord) {
-                result.push_back(currentPrefix);
-            }
-            for (int i = 0; i < 26; ++i) {
-                if (node->children[i] != nullptr) {
-                    char ch = 'a' + i;
-                    storeAllWordsWithGivenPrefix(node->children[i], currentPrefix + ch, result);
-                }
+    /**
+     * Depth-First Search (DFS) to find all valid words branching from a given node.
+     * @param node The current node to search from.
+     * @param currentPrefix The string formed by the path to this node.
+     * @param result Vector to store the discovered words.
+     */
+    void storeAllWordsWithGivenPrefix(TrieNode* node, string currentPrefix, vector<string>& result) {
+        if (node->isEndOfWord) {
+            result.push_back(currentPrefix);
+        }
+        for (int i = 0; i < 26; ++i) {
+            if (node->children[i] != nullptr) {
+                char ch = 'a' + i;
+                storeAllWordsWithGivenPrefix(node->children[i], currentPrefix + ch, result);
             }
         }
+    }
 
-    public:
-        Trie() {
-            root = new TrieNode();
-        }
+public:
+    Trie() {
+        root = new TrieNode();
+    }
 
-        // Inserting a word
-        void insert(string word) {
-            TrieNode* node = root;
-            for (char ch : word) {
-                int index = ch - 'a';
-                if (node->children[index] == nullptr) {
-                    node->children[index] = new TrieNode();
-                }
-                node = node->children[index];
+    /**
+     * Inserts a word into the Trie structure.
+     * Time Complexity: O(L) where L is the length of the word.
+     */
+    void insert(string word) {
+        TrieNode* node = root;
+        for (char ch : word) {
+            int index = ch - 'a';
+            if (node->children[index] == nullptr) {
+                node->children[index] = new TrieNode();
             }
-            node->isEndOfWord = true;
+            node = node->children[index];
         }
+        node->isEndOfWord = true;
+    }
 
-        vector<string> autocomplete(const string& prefix) {
-            TrieNode* node = root;
-            vector<string> results;
-            for (char c : prefix) {
-                if (node->children[c - 'a'] == nullptr) {
-                    return results; // Empty vector if the prefix is not found
-                }
-                node = node->children[c - 'a'];
+    /**
+     * Finds all words that start with the specified prefix.
+     * @return A vector of strings containing matching words.
+     */
+    vector<string> autocomplete(const string& prefix) {
+        TrieNode* node = root;
+        vector<string> results;
+        for (char c : prefix) {
+            if (node->children[c - 'a'] == nullptr) {
+                return results; // Return empty if prefix path doesn't exist
             }
-            storeAllWordsWithGivenPrefix(node, prefix, results);
-            return results;
+            node = node->children[c - 'a'];
         }
-
+        storeAllWordsWithGivenPrefix(node, prefix, results);
+        return results;
+    }
 };
 
 string toLowerCase(string s) {

@@ -21,18 +21,24 @@
     </div>
 
     <script>
+        /**
+         * Fetches suggestions from the Flask API as the user types.
+         */
         async function getSuggestions() {
             const q = document.getElementById('query').value;
             const resDiv = document.getElementById('results');
             
+            // Only search if the user has typed at least 2 characters
             if (q.length < 2) {
                 resDiv.innerHTML = '';
                 return;
             }
 
+            // Fetch results from the backend search endpoint
             const response = await fetch(`/search?q=${q}`);
             const data = await response.json();
 
+            // Build the HTML for the suggestion groups
             resDiv.innerHTML = data.map((group, index) => `
                 <div class="suggestion-group">
                     <div class="prefix-label">Prefix: "${q.substring(0, index + 2)}"</div>
